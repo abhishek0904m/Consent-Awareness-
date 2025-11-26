@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">C-SUPER</string>
+    <string name="accessibility_service_description">C-SUPER UI Interaction Logger - Tracks app usage and UI interactions for privacy transparency. All data stays local on your device.</string>
+    
+    <!-- Consent Screen -->
+    <string name="consent_title">Welcome to C-SUPER</string>
+    <string name="consent_subtitle">Consent-Aware Sensor–UI Correlation Profiler</string>
+    <string name="consent_description">C-SUPER helps you understand how sensors and UI interactions correlate on your device. All data remains local and encrypted.</string>
+    <string name="consent_privacy_statement">Privacy Statement: C-SUPER is designed for research and transparency purposes only. It does not record personal data or send information to any external server. All captured data remains local and fully under user control.</string>
+    
+    <!-- Permissions -->
+    <string name="permission_location">Location Access</string>
+    <string name="permission_location_desc">Track location sensor data</string>
+    <string name="permission_microphone">Microphone Access</string>
+    <string name="permission_microphone_desc">Monitor microphone usage</string>
+    <string name="permission_camera">Camera Access</string>
+    <string name="permission_camera_desc">Monitor camera usage</string>
+    <string name="permission_sensors">Body Sensors</string>
+    <string name="permission_sensors_desc">Track accelerometer, gyroscope data</string>
+    <string name="permission_accessibility">Accessibility Service</string>
+    <string name="permission_accessibility_desc">Required to track UI interactions</string>
+    <string name="permission_usage_stats">Usage Stats</string>
+    <string name="permission_usage_stats_desc">Track app usage patterns</string>
+    
+    <!-- Buttons -->
+    <string name="btn_grant_consent">Grant Consent</string>
+    <string name="btn_continue">Continue to Dashboard</string>
+    <string name="btn_revoke">Revoke</string>
+    <string name="btn_start_profiling">Start Profiling</string>
+    <string name="btn_stop_profiling">Stop Profiling</string>
+    <string name="btn_export_data">Export Data</string>
+    <string name="btn_delete_all_data">Delete All Data</string>
+    <string name="btn_view_consent_logs">View Consent Logs</string>
+    
+    <!-- Dashboard -->
+    <string name="dashboard_title">Privacy Dashboard</string>
+    <string name="dashboard_active_permissions">Active Permissions</string>
+    <string name="dashboard_sensor_updates">Sensor Updates/sec</string>
+    <string name="dashboard_recent_events">Recent Correlations</string>
+    <string name="dashboard_status_monitoring">Monitoring Active</string>
+    <string name="dashboard_status_idle">Monitoring Stopped</string>
+    
+    <!-- Notifications -->
+    <string name="notification_channel_name">Sensor Monitoring</string>
+    <string name="notification_channel_desc">Shows when C-SUPER is actively monitoring sensors</string>
+    <string name="notification_title">C-SUPER Active</string>
+    <string name="notification_text">Monitoring sensors and UI interactions</string>
+    
+    <!-- Alerts -->
+    <string name="alert_confirm_delete_title">Delete All Data?</string>
+    <string name="alert_confirm_delete_message">This will permanently delete all collected sensor and UI data. This action cannot be undone.</string>
+    <string name="alert_cancel">Cancel</string>
+    <string name="alert_confirm">Confirm</string>
+    
+    <!-- Messages -->
+    <string name="msg_consent_granted">Consent granted for %1$s</string>
+    <string name="msg_consent_revoked">Consent revoked for %1$s</string>
+    <string name="msg_data_deleted">All data deleted successfully</string>
+    <string name="msg_data_exported">Data exported successfully</string>
+    <string name="msg_enable_accessibility">Please enable Accessibility Service in Settings</string>
+    <string name="msg_enable_usage_stats">Please enable Usage Stats in Settings</string>
+</resources>

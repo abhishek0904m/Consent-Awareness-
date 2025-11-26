@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.csuper.data.dao.ConsentReceiptDao
 import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
@@ -34,6 +35,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun sensorEventDao(): SensorEventDao
     abstract fun uiEventDao(): UiEventDao
     abstract fun correlationResultDao(): CorrelationResultDao
+    abstract fun consentReceiptDao(): ConsentReceiptDao
     
     companion object {
         @Volatile

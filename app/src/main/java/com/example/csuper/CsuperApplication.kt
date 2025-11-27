@@ -1,6 +1,7 @@
 package com.example.csuper
 
 import android.app.Application
+import com.example.csuper.service.WorkScheduler
 import dagger.hilt.android.HiltAndroidApp
 
 /**
@@ -17,6 +18,7 @@ class CsuperApplication : Application() {
     
     override fun onCreate() {
         super.onCreate()
-        // Application initialization
+        // Schedule periodic work for usage stats collection
+        WorkScheduler.schedule(this)
     }
 }

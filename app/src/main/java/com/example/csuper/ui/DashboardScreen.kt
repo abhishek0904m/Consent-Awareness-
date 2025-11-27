@@ -1,11 +1,14 @@
 package com.example.csuper.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -13,47 +16,52 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.csuper.data.db.ForegroundEvent
+import com.example.csuper.viewmodel.DashboardViewModel
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
- * Restored full dashboard structure:
+ * Dashboard screen wired to ViewModel:
  * - Monitoring status card
  * - Active permissions card
  * - Statistics card
  * - Recent correlations list
+ * - Foreground events from DB
  * - Export Data section
- * - Delete All Data button
+ * - Delete All Data button with snackbar
  * - Floating Action Button
- *
- * Replace the placeholder composable (MonitoringStatusCard, ActivePermissionsCard, StatisticsCard,
- * CorrelationRow, EmptyCorrelationsPlaceholder, DeleteAllDataButton) with your real ones if you have them.
  */
 @Composable
 fun DashboardScreen(
-    // Replace these with real ViewModel/state values later
-    isMonitoringActive: Boolean = true,
-    monitoringSince: Long = System.currentTimeMillis() - 60_000L,
-    activePermissions: List<String> = listOf("Microphone", "Location", "Camera"),
-    sensorEventsCount: Int = 10810,
-    uiEventsCount: Int = 23,
-    correlationCount: Int = 5,
-    recentCorrelations: List<String> = listOf("Mic + UI Tap", "Location + App Open"),
-
-    // Callbacks
-    onDeleteAllData: () -> Unit = {},
-    onFabClick: () -> Unit = {}
+    viewModel: DashboardViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    // Show snackbar when delete completes
+    LaunchedEffect(uiState.showDeleteSnackbar) {
+        if (uiState.showDeleteSnackbar) {
+            snackbarHostState.showSnackbar("All data deleted")
+            viewModel.dismissDeleteSnackbar()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            FloatingActionButton(onClick = onFabClick) {
+            FloatingActionButton(onClick = { viewModel.refreshStats() }) {
                 Text("+")
             }
         },
@@ -74,56 +82,90 @@ fun DashboardScreen(
                 )
             }
 
-            // Monitoring card (placeholder)
+            // Monitoring card
             item {
                 MonitoringStatusCard(
-                    active = isMonitoringActive,
-                    sinceTimestamp = monitoringSince
+                    active = uiState.isProfilingActive,
+                    sinceTimestamp = uiState.lastRefreshTime.takeIf { it > 0 } ?: System.currentTimeMillis()
                 )
             }
 
-            // Active permissions card (placeholder)
+            // Active permissions card
             item {
-                ActivePermissionsCard(permissions = activePermissions)
+                ActivePermissionsCard(permissions = uiState.activePermissions)
             }
 
-            // Statistics card (placeholder)
+            // Statistics card
             item {
                 StatisticsCard(
-                    sensorEvents = sensorEventsCount,
-                    uiEvents = uiEventsCount,
-                    correlations = correlationCount
+                    sensorEvents = uiState.correlationStats.sensorEventCount,
+                    uiEvents = uiState.correlationStats.uiEventCount,
+                    correlations = uiState.correlationStats.correlationCount
                 )
             }
 
-            // Recent correlations (placeholder list)
-            if (recentCorrelations.isNotEmpty()) {
-                items(recentCorrelations) { label ->
-                    CorrelationRow(label)
+            // Recent correlations
+            if (uiState.recentCorrelations.isNotEmpty()) {
+                items(uiState.recentCorrelations) { correlation ->
+                    CorrelationRow("Correlation #${correlation.id}: ${correlation.sensorEventCount} sensors")
                 }
             } else {
                 item { EmptyCorrelationsPlaceholder() }
             }
 
-            // Export section (your working button)
+            // Foreground Events from DB
+            if (uiState.foregroundEvents.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "Recent Foreground Events",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                items(uiState.foregroundEvents) { event ->
+                    ForegroundEventRow(event)
+                }
+            }
+
+            // Export section
             item {
                 DashboardExportSection(
-                    sensorEvents = sensorEventsCount,
-                    uiEvents = uiEventsCount,
-                    correlations = correlationCount,
-                    appVersionProvider = { "1.0" } // Replace with BuildConfig.VERSION_NAME later
+                    sensorEvents = uiState.correlationStats.sensorEventCount,
+                    uiEvents = uiState.correlationStats.uiEventCount,
+                    correlations = uiState.correlationStats.correlationCount,
+                    appVersionProvider = { "1.0" }
                 )
             }
 
-            // Delete all data (placeholder)
+            // Delete all data
             item {
                 DeleteAllDataButton {
-                    onDeleteAllData()
-                    scope.launch {
-                        snackbarHostState.showSnackbar("All data deleted")
-                    }
+                    viewModel.deleteAllData()
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ForegroundEventRow(event: ForegroundEvent) {
+    val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    val time = dateFormat.format(Date(event.startTime))
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = event.packageName,
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "Started: $time",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

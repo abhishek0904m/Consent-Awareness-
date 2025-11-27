@@ -2,9 +2,12 @@ package com.example.csuper.di
 
 import android.content.Context
 import com.example.csuper.data.AppDatabase
+import com.example.csuper.data.Repository
 import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
+import com.example.csuper.data.db.ForegroundEventDao
+import com.example.csuper.data.db.PermissionUsageDao
 import com.example.csuper.util.ConsentStore
 import dagger.Module
 import dagger.Provides
@@ -45,6 +48,27 @@ object AppModule {
     @Singleton
     fun provideCorrelationResultDao(database: AppDatabase): CorrelationResultDao {
         return database.correlationResultDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideForegroundEventDao(database: AppDatabase): ForegroundEventDao {
+        return database.foregroundEventDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun providePermissionUsageDao(database: AppDatabase): PermissionUsageDao {
+        return database.permissionUsageDao()
+    }
+    
+    @Provides
+    @Singleton
+    fun provideRepository(
+        foregroundEventDao: ForegroundEventDao,
+        permissionUsageDao: PermissionUsageDao
+    ): Repository {
+        return Repository(foregroundEventDao, permissionUsageDao)
     }
     
     @Provides

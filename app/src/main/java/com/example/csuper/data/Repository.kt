@@ -41,6 +41,14 @@ class Repository @Inject constructor(
     }
 
     /**
+     * Inserts multiple foreground events in a single transaction.
+     * @param events The list of events to insert
+     */
+    suspend fun insertForegroundEvents(events: List<ForegroundEvent>) {
+        foregroundEventDao.insertAll(events)
+    }
+
+    /**
      * Inserts a new permission usage record.
      */
     suspend fun insertPermissionUsage(usage: PermissionUsage): Long {

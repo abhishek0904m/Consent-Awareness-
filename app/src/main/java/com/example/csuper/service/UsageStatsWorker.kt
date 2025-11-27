@@ -11,6 +11,7 @@ import com.example.csuper.data.Repository
 import com.example.csuper.data.db.ForegroundEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import java.util.concurrent.TimeUnit
 
 /**
  * WorkManager Worker that queries UsageStatsManager for recent UsageEvents
@@ -25,6 +26,7 @@ class UsageStatsWorker @AssistedInject constructor(
 
     companion object {
         private const val TAG = "UsageStatsWorker"
+        private val QUERY_WINDOW_MS = TimeUnit.HOURS.toMillis(1)
     }
 
     override suspend fun doWork(): Result {
@@ -41,9 +43,9 @@ class UsageStatsWorker @AssistedInject constructor(
 
         // Query events from the last hour
         val endTime = System.currentTimeMillis()
-        val startTime = endTime - (60 * 60 * 1000L)
+        val startTime = endTime - QUERY_WINDOW_MS
 
-        Log.d(TAG, "doWork: Querying events from $startTime to $endTime")
+        Log.d(TAG, "doWork: Querying events for last ${TimeUnit.MILLISECONDS.toMinutes(QUERY_WINDOW_MS)} minutes")
 
         val usageEvents = usageStatsManager.queryEvents(startTime, endTime)
         val event = UsageEvents.Event()

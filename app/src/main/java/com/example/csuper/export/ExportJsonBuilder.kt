@@ -1,10 +1,9 @@
 package com.example.csuper.export
 
-import org.json.JSONArray
 import org.json.JSONObject
 
 object ExportJsonBuilder {
-    // Minimal JSON for Phase 1. We will expand this in later phases.
+
     fun buildMinimal(
         sensorEvents: Int,
         uiEvents: Int,
@@ -17,15 +16,16 @@ object ExportJsonBuilder {
         root.put("apiLevel", apiLevel)
         root.put("version", appVersion)
 
-        root.put("stats", JSONObject().apply {
+        val stats = JSONObject().apply {
             put("sensorEvents", sensorEvents)
             put("uiEvents", uiEvents)
             put("correlations", correlations)
-        })
+        }
+        root.put("stats", stats)
 
-        // Placeholders for future phases
-        root.put("foregroundEvents", JSONArray())
-        root.put("permissionUsage", JSONArray())
+        // Phase 1 placeholders
+        root.put("foregroundEvents", org.json.JSONArray())
+        root.put("permissionUsage", org.json.JSONArray())
 
         return root.toString(2)
     }

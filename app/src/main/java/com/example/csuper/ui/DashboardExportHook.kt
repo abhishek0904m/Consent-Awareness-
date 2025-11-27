@@ -1,14 +1,10 @@
-package com.example.csuper.ui.screens
+package com.example.csuper.ui
 
 import android.os.Build
 import androidx.compose.runtime.Composable
 import com.example.csuper.export.ExportJsonBuilder
 import com.example.csuper.ui.components.ExportButton
 
-/**
- * Phase 1: Minimal hook to wire the Export button into your dashboard.
- * Replace the placeholder counts with your real values when available.
- */
 @Composable
 fun DashboardExportSection(
     sensorEvents: Int,

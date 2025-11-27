@@ -98,9 +98,9 @@ fun DashboardScreen(
             // Statistics card
             item {
                 StatisticsCard(
-                    sensorEvents = uiState.correlationStats.sensorEventCount,
-                    uiEvents = uiState.correlationStats.uiEventCount,
-                    correlations = uiState.correlationStats.correlationCount
+                    sensorEvents = uiState.correlationStats.totalSensorEvents,
+                    uiEvents = uiState.correlationStats.totalUiEvents,
+                    correlations = uiState.correlationStats.totalCorrelations
                 )
             }
 
@@ -130,9 +130,9 @@ fun DashboardScreen(
             // Export section
             item {
                 DashboardExportSection(
-                    sensorEvents = uiState.correlationStats.sensorEventCount,
-                    uiEvents = uiState.correlationStats.uiEventCount,
-                    correlations = uiState.correlationStats.correlationCount,
+                    sensorEvents = uiState.correlationStats.totalSensorEvents,
+                    uiEvents = uiState.correlationStats.totalUiEvents,
+                    correlations = uiState.correlationStats.totalCorrelations,
                     appVersionProvider = { "1.0" }
                 )
             }

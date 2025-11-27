@@ -76,6 +76,8 @@ abstract class AppDatabase : RoomDatabase() {
                         // Database created
                     }
                 })
+                // Note: fallbackToDestructiveMigration() is used intentionally for this research app.
+                // For production apps with user data, implement proper migrations instead.
                 .fallbackToDestructiveMigration()
                 .build()
         }

@@ -3,18 +3,23 @@ package com.example.csuper.service
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
+import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.csuper.data.AppDatabase
 import com.example.csuper.data.db.ForegroundEvent
+import com.example.csuper.data.db.ForegroundEventDao
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
 /**
  * WorkManager Worker that queries UsageStatsManager for recent UsageEvents
  * and stores ACTIVITY_RESUMED events as ForegroundEvent entries.
  */
-class UsageStatsWorker(
-    context: Context,
-    workerParams: WorkerParameters
+@HiltWorker
+class UsageStatsWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val foregroundEventDao: ForegroundEventDao
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
@@ -24,8 +29,6 @@ class UsageStatsWorker(
         }
 
         val usageStatsManager = applicationContext.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val database = AppDatabase.getInstance(applicationContext)
-        val foregroundEventDao = database.foregroundEventDao()
 
         // Query events from the last 15 minutes
         val endTime = System.currentTimeMillis()

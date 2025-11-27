@@ -1,8 +1,11 @@
 package com.example.csuper
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.example.csuper.service.WorkScheduler
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 /**
  * C-SUPER Application Class
@@ -14,11 +17,19 @@ import dagger.hilt.android.HiltAndroidApp
  * All captured data remains local and fully under user control.
  */
 @HiltAndroidApp
-class CsuperApplication : Application() {
+class CsuperApplication : Application(), Configuration.Provider {
+    
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
     
     override fun onCreate() {
         super.onCreate()
         // Schedule periodic work for usage stats collection
         WorkScheduler.schedule(this)
     }
+    
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

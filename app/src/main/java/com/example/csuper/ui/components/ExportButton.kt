@@ -28,8 +28,15 @@ fun ExportButton(
             Toast.makeText(context, "Export canceled", Toast.LENGTH_SHORT).show()
         } else {
             try {
-                context.contentResolver.openOutputStream(uri)?.use { os ->
-                    val bytes = buildContent().toByteArray(Charsets.UTF_8)
+                // Build content before file operation to keep file I/O fast
+                val content = buildContent()
+                val outputStream = context.contentResolver.openOutputStream(uri)
+                if (outputStream == null) {
+                    Toast.makeText(context, "Export failed: Could not open file", Toast.LENGTH_LONG).show()
+                    return@rememberLauncherForActivityResult
+                }
+                outputStream.use { os ->
+                    val bytes = content.toByteArray(Charsets.UTF_8)
                     os.write(bytes)
                     os.flush()
                 }

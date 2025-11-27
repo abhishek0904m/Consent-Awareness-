@@ -1,5 +1,6 @@
 package com.example.csuper.export
 
+import org.json.JSONArray
 import org.json.JSONObject
 
 object ExportJsonBuilder {
@@ -23,8 +24,8 @@ object ExportJsonBuilder {
         })
 
         // Placeholders for future phases
-        root.put("foregroundEvents", emptyList<Any>())
-        root.put("permissionUsage", emptyList<Any>())
+        root.put("foregroundEvents", JSONArray())
+        root.put("permissionUsage", JSONArray())
 
         return root.toString(2)
     }

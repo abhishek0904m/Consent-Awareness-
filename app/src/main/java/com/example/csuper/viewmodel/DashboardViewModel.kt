@@ -7,9 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.csuper.correlation.CorrelationEngine
 import com.example.csuper.correlation.CorrelationStats
 import com.example.csuper.data.CorrelationResultEntity
+import com.example.csuper.data.Repository
 import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
+import com.example.csuper.data.db.ForegroundEvent
 import com.example.csuper.service.SensorForegroundService
 import com.example.csuper.util.ConsentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +32,8 @@ class DashboardViewModel @Inject constructor(
     private val correlationEngine: CorrelationEngine,
     private val sensorEventDao: SensorEventDao,
     private val uiEventDao: UiEventDao,
-    private val correlationResultDao: CorrelationResultDao
+    private val correlationResultDao: CorrelationResultDao,
+    private val repository: Repository
 ) : AndroidViewModel(application) {
     
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -40,6 +43,7 @@ class DashboardViewModel @Inject constructor(
         loadDashboardData()
         observeProfilingState()
         observeRecentCorrelations()
+        observeForegroundEvents()
     }
     
     private fun loadDashboardData() {
@@ -71,6 +75,14 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             correlationResultDao.getRecentResults(20).collect { results ->
                 _uiState.value = _uiState.value.copy(recentCorrelations = results)
+            }
+        }
+    }
+    
+    private fun observeForegroundEvents() {
+        viewModelScope.launch {
+            repository.recentForegroundEvents(50).collect { events ->
+                _uiState.value = _uiState.value.copy(foregroundEvents = events)
             }
         }
     }
@@ -120,14 +132,21 @@ class DashboardViewModel @Inject constructor(
             sensorEventDao.deleteAll()
             uiEventDao.deleteAll()
             correlationResultDao.deleteAll()
+            repository.clearAll()
             
             val stats = correlationEngine.getCorrelationStats()
             _uiState.value = _uiState.value.copy(
                 correlationStats = stats,
                 isDeleting = false,
-                recentCorrelations = emptyList()
+                recentCorrelations = emptyList(),
+                foregroundEvents = emptyList(),
+                showDeleteSnackbar = true
             )
         }
+    }
+    
+    fun dismissDeleteSnackbar() {
+        _uiState.value = _uiState.value.copy(showDeleteSnackbar = false)
     }
     
     fun exportData() {
@@ -155,8 +174,10 @@ data class DashboardUiState(
     val activePermissions: List<String> = emptyList(),
     val correlationStats: CorrelationStats = CorrelationStats(0, 0, 0),
     val recentCorrelations: List<CorrelationResultEntity> = emptyList(),
+    val foregroundEvents: List<ForegroundEvent> = emptyList(),
     val lastRefreshTime: Long = 0,
     val isDeleting: Boolean = false,
     val isExporting: Boolean = false,
-    val exportSuccess: Boolean = false
+    val exportSuccess: Boolean = false,
+    val showDeleteSnackbar: Boolean = false
 )

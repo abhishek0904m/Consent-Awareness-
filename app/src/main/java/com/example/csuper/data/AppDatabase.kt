@@ -9,6 +9,10 @@ import com.example.csuper.data.dao.ConsentReceiptDao
 import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
+import com.example.csuper.data.db.ForegroundEvent
+import com.example.csuper.data.db.ForegroundEventDao
+import com.example.csuper.data.db.PermissionUsage
+import com.example.csuper.data.db.PermissionUsageDao
 import net.sqlcipher.database.SQLiteDatabase
 import net.sqlcipher.database.SupportFactory
 
@@ -25,9 +29,11 @@ import net.sqlcipher.database.SupportFactory
         SensorEventEntity::class,
         UiEventEntity::class,
         CorrelationResultEntity::class,
-        ConsentReceiptEntity::class
+        ConsentReceiptEntity::class,
+        ForegroundEvent::class,
+        PermissionUsage::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,6 +42,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun uiEventDao(): UiEventDao
     abstract fun correlationResultDao(): CorrelationResultDao
     abstract fun consentReceiptDao(): ConsentReceiptDao
+    abstract fun foregroundEventDao(): ForegroundEventDao
+    abstract fun permissionUsageDao(): PermissionUsageDao
     
     companion object {
         @Volatile
@@ -68,6 +76,8 @@ abstract class AppDatabase : RoomDatabase() {
                         // Database created
                     }
                 })
+                // Note: fallbackToDestructiveMigration() is used intentionally for this research app.
+                // For production apps with user data, implement proper migrations instead.
                 .fallbackToDestructiveMigration()
                 .build()
         }

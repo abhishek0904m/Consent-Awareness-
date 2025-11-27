@@ -12,6 +12,9 @@ interface ForegroundEventDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(event: ForegroundEvent): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(events: List<ForegroundEvent>)
+
     @Query("SELECT * FROM foreground_events ORDER BY startTime DESC LIMIT :limit")
     fun recent(limit: Int): Flow<List<ForegroundEvent>>
 

@@ -2,7 +2,6 @@ package com.example.csuper.di
 
 import android.content.Context
 import com.example.csuper.data.AppDatabase
-import com.example.csuper.data.Repository
 import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
@@ -60,15 +59,6 @@ object AppModule {
     @Singleton
     fun providePermissionUsageDao(database: AppDatabase): PermissionUsageDao {
         return database.permissionUsageDao()
-    }
-    
-    @Provides
-    @Singleton
-    fun provideRepository(
-        foregroundEventDao: ForegroundEventDao,
-        permissionUsageDao: PermissionUsageDao
-    ): Repository {
-        return Repository(foregroundEventDao, permissionUsageDao)
     }
     
     @Provides

@@ -8,13 +8,12 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ForegroundEventDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(event: ForegroundEvent): Long
+    suspend fun insertAll(events: List<ForegroundEvent>)
 
-    @Query("SELECT * FROM foreground_events ORDER BY startTime DESC LIMIT :limit")
-    fun recent(limit: Int): Flow<List<ForegroundEvent>>
+    @Query("SELECT * FROM foreground_event ORDER BY startTime DESC LIMIT :limit")
+    fun recent(limit: Int = 100): Flow<List<ForegroundEvent>>
 
-    @Query("DELETE FROM foreground_events")
-    suspend fun deleteAll()
+    @Query("DELETE FROM foreground_event")
+    suspend fun clearAll()
 }

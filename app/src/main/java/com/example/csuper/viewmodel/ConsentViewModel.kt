@@ -1,7 +1,6 @@
 package com.example.csuper.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.csuper.util.ConsentStore
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,17 +16,16 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ConsentViewModel @Inject constructor(
-    application: Application,
     private val consentStore: ConsentStore
-) : AndroidViewModel(application) {
-    
+) : ViewModel() {
+
     private val _uiState = MutableStateFlow(ConsentUiState())
     val uiState: StateFlow<ConsentUiState> = _uiState.asStateFlow()
-    
+
     init {
         loadConsentState()
     }
-    
+
     private fun loadConsentState() {
         viewModelScope.launch {
             consentStore.getAllConsents().collect { consents ->
@@ -42,7 +40,7 @@ class ConsentViewModel @Inject constructor(
             }
         }
     }
-    
+
     fun toggleLocationConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.locationConsent
@@ -50,7 +48,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(locationConsent = newValue)
         }
     }
-    
+
     fun toggleMicrophoneConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.microphoneConsent
@@ -58,7 +56,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(microphoneConsent = newValue)
         }
     }
-    
+
     fun toggleCameraConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.cameraConsent
@@ -66,7 +64,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(cameraConsent = newValue)
         }
     }
-    
+
     fun toggleSensorsConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.sensorsConsent
@@ -74,7 +72,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(sensorsConsent = newValue)
         }
     }
-    
+
     fun toggleAccessibilityConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.accessibilityConsent
@@ -82,7 +80,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(accessibilityConsent = newValue)
         }
     }
-    
+
     fun toggleUsageStatsConsent() {
         viewModelScope.launch {
             val newValue = !_uiState.value.usageStatsConsent
@@ -90,7 +88,7 @@ class ConsentViewModel @Inject constructor(
             _uiState.value = _uiState.value.copy(usageStatsConsent = newValue)
         }
     }
-    
+
     fun completeConsent() {
         viewModelScope.launch {
             consentStore.setFirstLaunchCompleted()

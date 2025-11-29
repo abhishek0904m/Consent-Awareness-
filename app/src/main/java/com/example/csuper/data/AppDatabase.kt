@@ -1,89 +1,33 @@
-package com.example.csuper.data
+package com.example.csuper.data.db
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.csuper.data.dao.ConsentReceiptDao
-import com.example.csuper.data.dao.CorrelationResultDao
+import com.example.csuper.data.SensorEventEntity
+import com.example.csuper.data.UiEventEntity
+import com.example.csuper.data.CorrelationResultEntity
+import com.example.csuper.data.db.PermissionUsage
+import com.example.csuper.data.db.ForegroundEvent
 import com.example.csuper.data.dao.SensorEventDao
 import com.example.csuper.data.dao.UiEventDao
-import com.example.csuper.data.db.ForegroundEvent
-import com.example.csuper.data.db.ForegroundEventDao
-import com.example.csuper.data.db.PermissionUsage
+import com.example.csuper.data.dao.CorrelationResultDao
 import com.example.csuper.data.db.PermissionUsageDao
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import com.example.csuper.data.db.ForegroundEventDao
 
-/**
- * Main Room Database for C-SUPER
- * All data is encrypted using SQLCipher for privacy protection
- * 
- * Privacy Statement:
- * This database stores all sensor and UI data locally with AES encryption.
- * No data is transmitted to external servers.
- */
 @Database(
     entities = [
         SensorEventEntity::class,
         UiEventEntity::class,
         CorrelationResultEntity::class,
-        ConsentReceiptEntity::class,
-        ForegroundEvent::class,
-        PermissionUsage::class
+        PermissionUsage::class,
+        ForegroundEvent::class
     ],
-    version = 2,
+    version = 1,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
-    
     abstract fun sensorEventDao(): SensorEventDao
     abstract fun uiEventDao(): UiEventDao
     abstract fun correlationResultDao(): CorrelationResultDao
-    abstract fun consentReceiptDao(): ConsentReceiptDao
-    abstract fun foregroundEventDao(): ForegroundEventDao
     abstract fun permissionUsageDao(): PermissionUsageDao
-    
-    companion object {
-        @Volatile
-        private var INSTANCE: AppDatabase? = null
-        private const val DATABASE_NAME = "csuper_db"
-        
-        fun getInstance(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
-                val instance = buildDatabase(context)
-                INSTANCE = instance
-                instance
-            }
-        }
-        
-        private fun buildDatabase(context: Context): AppDatabase {
-            // Use a simple passphrase derived from app-specific data
-            // In production, this should use Android Keystore
-            val passphrase = SQLiteDatabase.getBytes("csuper_encryption_key_v1".toCharArray())
-            val factory = SupportFactory(passphrase)
-            
-            return Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                DATABASE_NAME
-            )
-                .openHelperFactory(factory)
-                .addCallback(object : RoomDatabase.Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        super.onCreate(db)
-                        // Database created
-                    }
-                })
-                // Note: fallbackToDestructiveMigration() is used intentionally for this research app.
-                // For production apps with user data, implement proper migrations instead.
-                .fallbackToDestructiveMigration()
-                .build()
-        }
-        
-        fun clearInstance() {
-            INSTANCE = null
-        }
-    }
+    abstract fun foregroundEventDao(): ForegroundEventDao
 }

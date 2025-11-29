@@ -14,19 +14,14 @@ import com.example.csuper.util.ConsentStore
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
-/**
- * Main Activity for C-SUPER app
- * Uses Jetpack Compose for UI
- */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    
+
     @Inject
     lateinit var consentStore: ConsentStore
-    
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
         setContent {
             CsuperTheme {
                 Surface(

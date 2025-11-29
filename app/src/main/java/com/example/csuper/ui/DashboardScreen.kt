@@ -1,146 +1,159 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.example.csuper.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.csuper.data.db.ForegroundEvent
-import com.example.csuper.viewmodel.DashboardViewModel
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.compose.ui.unit.sp
 
-/**
- * Dashboard screen wired to ViewModel:
- * - Monitoring status card
- * - Active permissions card
- * - Statistics card
- * - Recent correlations list
- * - Foreground events from DB
- * - Export Data section
- * - Delete All Data button with snackbar
- * - Floating Action Button
- */
 @Composable
-fun DashboardScreen(
-    viewModel: DashboardViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    // Show snackbar when delete completes
-    LaunchedEffect(uiState.showDeleteSnackbar) {
-        if (uiState.showDeleteSnackbar) {
-            snackbarHostState.showSnackbar("All data deleted")
-            viewModel.dismissDeleteSnackbar()
-        }
-    }
+fun DashboardScreen() {
+    val monitoringActive = true
+    val activePermissions = listOf("Microphone", "Location", "Camera")
+    val sensorEvents = 256
+    val uiEvents = 120
+    val correlations = 17
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.refreshStats() }) {
-                Text("+")
-            }
+        topBar = {
+            TopAppBar(
+                title = { Text("Privacy Dashboard", fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
+            )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { innerPadding ->
-        LazyColumn(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { /* Show start/stop monitoring dialog */ },
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(
+                    if (monitoringActive) Icons.Default.Stop else Icons.Default.PlayArrow,
+                    contentDescription = null
+                )
+            }
+        }
+    ) { padding ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(padding)
+                .padding(horizontal = 20.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Header
-            item {
-                Text(
-                    text = "Privacy Dashboard",
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            }
-
-            // Monitoring card
-            item {
-                MonitoringStatusCard(
-                    active = uiState.isProfilingActive,
-                    sinceTimestamp = uiState.lastRefreshTime.takeIf { it > 0 } ?: System.currentTimeMillis()
-                )
-            }
-
-            // Active permissions card
-            item {
-                ActivePermissionsCard(permissions = uiState.activePermissions)
-            }
-
-            // Statistics card
-            item {
-                StatisticsCard(
-                    sensorEvents = uiState.correlationStats.sensorEventCount,
-                    uiEvents = uiState.correlationStats.uiEventCount,
-                    correlations = uiState.correlationStats.correlationCount
-                )
-            }
-
-            // Recent correlations
-            if (uiState.recentCorrelations.isNotEmpty()) {
-                items(uiState.recentCorrelations) { correlation ->
-                    CorrelationRow("Correlation #${correlation.id}: ${correlation.sensorEventCount} sensors")
-                }
-            } else {
-                item { EmptyCorrelationsPlaceholder() }
-            }
-
-            // Foreground Events from DB
-            if (uiState.foregroundEvents.isNotEmpty()) {
-                item {
-                    Text(
-                        text = "Recent Foreground Events",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(top = 8.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Shield,
+                        contentDescription = null,
+                        tint = if (monitoringActive) Color(0xFF4CAF50) else Color.Gray,
+                        modifier = Modifier.size(32.dp)
                     )
-                }
-                items(uiState.foregroundEvents) { event ->
-                    ForegroundEventRow(event)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            if (monitoringActive) "Monitoring Active" else "Monitoring Inactive",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            "App is ${if (monitoringActive) "" else "not "}actively collecting sensor and UI data.",
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
 
-            // Export section
-            item {
-                DashboardExportSection(
-                    sensorEvents = uiState.correlationStats.sensorEventCount,
-                    uiEvents = uiState.correlationStats.uiEventCount,
-                    correlations = uiState.correlationStats.correlationCount,
-                    appVersionProvider = { "1.0" }
-                )
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text("Active Permissions", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Security, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(8.dp))
+                        Row {
+                            activePermissions.forEach {
+                                Text(
+                                    text = it,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    modifier = Modifier
+                                        .padding(end = 8.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.tertiary,
+                                            shape = MaterialTheme.shapes.small
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            // Delete all data
-            item {
-                DeleteAllDataButton {
-                    viewModel.deleteAllData()
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    StatColumn("Sensor Events", sensorEvents, Icons.Default.Timeline)
+                    StatColumn("UI Events", uiEvents, Icons.Default.TouchApp)
+                    StatColumn("Correlations", correlations, Icons.Default.CompareArrows)
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFF1F8E9))
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("Recent Correlations", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Divider(Modifier.padding(vertical = 8.dp))
+                    Text("No recent correlations found.", fontSize = 14.sp, color = Color.Gray)
+                }
+            }
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { /* Export Data logic */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(Icons.Default.FileDownload, contentDescription = null)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Export Data")
+                }
+                OutlinedButton(
+                    onClick = { /* Delete All Data logic */ },
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null, tint = Color.Red)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Delete All", color = Color.Red)
                 }
             }
         }
@@ -148,24 +161,10 @@ fun DashboardScreen(
 }
 
 @Composable
-fun ForegroundEventRow(event: ForegroundEvent) {
-    val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-    val time = dateFormat.format(Date(event.startTime))
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(
-                text = event.packageName,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                text = "Started: $time",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+fun StatColumn(label: String, value: Int, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 4.dp)) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+        Text("$value", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text(label, fontSize = 13.sp, color = Color.Gray)
     }
 }
